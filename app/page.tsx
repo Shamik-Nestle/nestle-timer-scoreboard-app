@@ -4,6 +4,11 @@ import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw, Plus, Minus } from 'lucide-react';
 import CenterMessage from '@/components/centerMessage';
 
+type GifJson = {
+  increase : string;
+  decrease: string;
+}
+
 export default function Home() {
   // Timer state
   const [initialMinutes, setInitialMinutes] = useState(5);
@@ -12,7 +17,7 @@ export default function Home() {
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [gifs, setGifs] = useState(null);
+  const [gifs, setGifs] = useState<GifJson>({ increase: '', decrease: ''});
   const [headline, setHeadline] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -55,7 +60,6 @@ export default function Home() {
   };
 
   const getGif = (teamToScore: string, score: number, change: string) => {
-    console.log(change, winningTeam, teamToScore);
     const gif = change === 'increase' ? gifs.increase : gifs.decrease;
 
     // const randomIndex = Math.floor(Math.random() * 10);
