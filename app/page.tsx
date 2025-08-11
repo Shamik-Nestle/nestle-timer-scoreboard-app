@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Play, Pause, RotateCcw, Plus, Minus } from 'lucide-react';
 import CenterMessage from '@/components/centerMessage';
+import confetti from "canvas-confetti";
+
 
 type GifJson = {
   increase: string;
@@ -42,6 +44,14 @@ export default function Home() {
   const [gif, setGif] = useState('');
 
   const timeOverAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const fireConfetti = useCallback(() => {
+    confetti({
+      particleCount: 150,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+  }, []);
 
   // Voice countdown function
   const speakNumber = (number: number) => {
@@ -144,6 +154,8 @@ export default function Home() {
     timeOverAudio.load();
   }, []);
 
+
+
   const toggleTimer = () => {
     setIsRunning(!isRunning);
     if (!isRunning) {
@@ -182,49 +194,6 @@ export default function Home() {
     }
   };
 
-  const updateScore = (team: 'team1' | 'team2', change: number) => {
-    let newTeam1Score = team1Score;
-    let newTeam2Score = team2Score;
-    let newWinningTeam = winningTeam;
-
-    if (team === 'team1') {
-      newTeam1Score = Math.max(0, team1Score + change);
-      setTeam1Score(newTeam1Score);
-      animateScore('team1', change > 0 ? 'increase' : 'decrease');
-    } else {
-      newTeam2Score = Math.max(0, team2Score + change);
-      setTeam2Score(newTeam2Score);
-      animateScore('team2', change > 0 ? 'increase' : 'decrease');
-    }
-
-
-    if (newTeam1Score > newTeam2Score) {
-      newWinningTeam = team1Name;
-      setWinningTeam(newWinningTeam);
-    } else if (newTeam2Score > newTeam1Score) {
-      newWinningTeam = team2Name;
-      setWinningTeam(newWinningTeam);
-    } else {
-      setWinningTeam('Tie');
-    }
-
-    const updatedScore = team === 'team1' ? newTeam1Score : newTeam2Score;
-    const teamToScore = team === 'team1' ? team1Name : team2Name;
-    const scoreChange = change > 0 ? 'increase' : 'decrease';
-
-    if (gifs) {
-      const gif = getGif(teamToScore, updatedScore, scoreChange);
-      const headline = change > 0
-        ? `Way To Go ${teamToScore}!`
-        : `Try Harder ${teamToScore}!`;
-
-      setGif(gif);
-      setHeadline(headline);
-      setShowMessage(true);
-    }
-  };
-
-
   const handleScoreFocus = (team: 'team1' | 'team2') => {
     if (team === 'team1') {
       setIsEditingTeam1Score(true);
@@ -255,7 +224,6 @@ export default function Home() {
     const oldScore = team === 'team1' ? team1Score : team2Score;
     const change = validScore - oldScore;
 
-    // Update the actual score
     if (team === 'team1') {
       setTeam1Score(validScore);
       setIsEditingTeam1Score(false);
@@ -291,7 +259,9 @@ export default function Home() {
       const headline = change > 0
         ? `Way To Go ${teamToScore}!`
         : `Try Harder ${teamToScore}!`;
-
+      if(change > 0) {
+        fireConfetti();
+      }
       setGif(gif);
       setHeadline(headline);
       setShowMessage(true);
