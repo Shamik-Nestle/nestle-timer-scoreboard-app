@@ -1,12 +1,19 @@
 'use client';
 import { useEffect, useState } from 'react';
 
+type CenterMessageProps = {
+  gif: string;
+  duration: number;
+  onClose: () => void;
+  headline: string;
+};
+
 export default function CenterMessage({
   gif,
   duration = 3000,
   onClose,
   headline,
-}) {
+}: CenterMessageProps) {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
