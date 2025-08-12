@@ -155,9 +155,9 @@ export const ScoreboardProvider: React.FC<ScoreboardProviderProps> = ({ children
 
     const fireConfetti = useCallback(() => {
         confetti({
-            particleCount: 150,
-            spread: 70,
-            origin: { y: 0.6 },
+            particleCount: 320,
+            spread: 200,
+            origin: { y: 0.5 },
         });
     }, []);
 
