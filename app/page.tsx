@@ -17,6 +17,9 @@ export default function Home() {
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [showMessage, setShowMessage ] = useState(false);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const hasSpokenRef = useRef<Set<number>>(new Set());
@@ -141,6 +144,18 @@ export default function Home() {
     setInitialSeconds(seconds);
     setIsEditing(false);
   };
+
+  const showWinner = () => {
+    console.log("Winner show");
+    const title = state.winningTeam !== 'Tie' ? `${state.winningTeam} Wins!` : "It's a Tie!";
+    const team1Score = `Team 1 Score: ${state.team1.score}`;
+    const team2Score = `Team 2 Score: ${state.team2.score}`;
+    const description = team1Score + "\n" + team2Score;
+    setTitle(title);
+    setDescription(description);
+    setShowMessage(true);
+
+  }
 
 
   return (
@@ -277,7 +292,7 @@ export default function Home() {
 
             {/* Finish Button */}
             <button
-              onClick={() => console.log('Finish pressed')}
+              onClick={() => showWinner()}
               className="bg-red-500 text-white px-6 py-3 rounded-full hover:bg-red-600 transition-colors duration-300 font-semibold"
             >
               Finish
@@ -317,11 +332,12 @@ export default function Home() {
         </div>
 
         {/* Message Popup */}
-        {state.showMessage && (
+        {showMessage && (
           <CenterMessage
-            headline={state.headline}
-            duration={3000}
-            onClose={() => disableShowMessage()}
+            title={title}
+            description={description}
+            duration={20000}
+            onClose={() =>setShowMessage(false)}
           />
         )}
 

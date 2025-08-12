@@ -242,6 +242,8 @@ export const ScoreboardProvider: React.FC<ScoreboardProviderProps> = ({ children
         dispatch({ type: 'SET_SHOW_MESSAGE', payload: {input: false }});
     }
 
+
+
     const value = {
         state,
         dispatch,
