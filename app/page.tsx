@@ -5,7 +5,7 @@ import { Play, Pause, RotateCcw, Plus, Minus } from 'lucide-react';
 import CenterMessage from '@/components/centerMessage';
 import confetti from "canvas-confetti";
 import { useScoreboard } from './context/scoreboardContext';
-
+import { TEAM_COLORS } from './constants/teams';
 
 
 
@@ -19,7 +19,7 @@ export default function Home() {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [showMessage, setShowMessage ] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const hasSpokenRef = useRef<Set<number>>(new Set());
@@ -32,7 +32,7 @@ export default function Home() {
     handleScoreInputChange,
     handleScoreSubmit,
     handleScoreKeyPress,
-    disableShowMessage
+    fireConfetti
   } = useScoreboard();
 
   const timeOverAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -146,7 +146,6 @@ export default function Home() {
   };
 
   const showWinner = () => {
-    console.log("Winner show");
     const title = state.winningTeam !== 'Tie' ? `${state.winningTeam} Wins!` : "It's a Tie!";
     const team1Score = `Team 1 Score: ${state.team1.score}`;
     const team2Score = `Team 2 Score: ${state.team2.score}`;
@@ -154,6 +153,7 @@ export default function Home() {
     setTitle(title);
     setDescription(description);
     setShowMessage(true);
+    fireConfetti();
 
   }
 
@@ -185,7 +185,7 @@ export default function Home() {
         {/* Header */}
         <div className="flex flex-col items-center space-y-2">
           <h1 className="text-6xl font-extrabold text-[#01519A]">
-            Nestlé Timer & Scoreboard
+            Timer & Scoreboard
           </h1>
         </div>
 
@@ -197,8 +197,9 @@ export default function Home() {
               <input
                 type="text"
                 value={state.team1.name}
-                onChange={(e) => updateTeamName('team1', e.target.value)}
-                className="text-3xl font-bold text-[#01519A] bg-transparent border-b-2 border-blue-200 focus:border-[#01519A] focus:outline-none text-center w-full mb-4 pb-2"
+                onChange={(e) => updateTeamName("team1", e.target.value)}
+                className={`text-3xl font-bold ${TEAM_COLORS[state.team1.name as keyof typeof TEAM_COLORS] || "text-[#01519A]"
+                  } bg-transparent border-b-2 border-blue-200 focus:border-[#01519A] focus:outline-none text-center w-full mb-4 pb-2`}
                 maxLength={20}
               />
               <input
@@ -253,8 +254,8 @@ export default function Home() {
               ) : (
                 <div
                   className={`text-6xl font-mono cursor-pointer transition-colors duration-300 ${minutes === 0 && seconds <= 10
-                      ? 'text-red-500 animate-pulse'
-                      : 'text-[#01519A]'
+                    ? 'text-red-500 animate-pulse'
+                    : 'text-[#01519A]'
                     }`}
                   onClick={() => !isRunning && setIsEditing(true)}
                 >
@@ -306,7 +307,8 @@ export default function Home() {
                 type="text"
                 value={state.team2.name}
                 onChange={(e) => updateTeamName('team2', e.target.value)}
-                className="text-3xl font-bold text-[#01519A] bg-transparent border-b-2 border-blue-200 focus:border-[#01519A] focus:outline-none text-center w-full mb-4 pb-2"
+                className={`text-3xl font-bold ${TEAM_COLORS[state.team2.name as keyof typeof TEAM_COLORS] || "text-[#01519A]"
+                  } bg-transparent border-b-2 border-blue-200 focus:border-[#01519A] focus:outline-none text-center w-full mb-4 pb-2`}
                 maxLength={20}
               />
               <input
@@ -337,7 +339,7 @@ export default function Home() {
             title={title}
             description={description}
             duration={20000}
-            onClose={() =>setShowMessage(false)}
+            onClose={() => setShowMessage(false)}
           />
         )}
 

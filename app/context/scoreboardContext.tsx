@@ -130,6 +130,7 @@ type ScoreboardContextType = {
     handleScoreSubmit: (team: 'team1' | 'team2') => void;
     handleScoreKeyPress: (team: 'team1' | 'team2', e: React.KeyboardEvent) => void;
     disableShowMessage: () => void;
+    fireConfetti: () => void;
 };
 
 const ScoreboardContext = createContext<ScoreboardContextType | undefined>(undefined);
@@ -252,7 +253,8 @@ export const ScoreboardProvider: React.FC<ScoreboardProviderProps> = ({ children
         handleScoreInputChange,
         handleScoreSubmit,
         handleScoreKeyPress,
-        disableShowMessage
+        disableShowMessage,
+        fireConfetti
     };
 
     return (
