@@ -2,14 +2,12 @@
 import { useEffect, useState } from 'react';
 
 type CenterMessageProps = {
-  gif: string;
   duration: number;
   onClose: () => void;
   headline: string;
 };
 
 export default function CenterMessage({
-  gif,
   duration = 3000,
   onClose,
   headline,
@@ -31,11 +29,6 @@ export default function CenterMessage({
     <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-[9999]">
       <div className="bg-white/90 p-6 rounded-xl shadow-lg text-center space-y-4 max-w-[80%]">
         <h2 className="text-4xl font-extrabold text-gray-800">{headline}</h2>
-        <img
-          src={gif}
-          alt="Score animation"
-          className="w-80 h-80 mx-auto object-contain"
-        />
       </div>
     </div>
   );

@@ -4,12 +4,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Play, Pause, RotateCcw, Plus, Minus } from 'lucide-react';
 import CenterMessage from '@/components/centerMessage';
 import confetti from "canvas-confetti";
+import { useScoreboard } from './context/scoreboardContext';
 
 
-type GifJson = {
-  increase: string;
-  decrease: string;
-}
+
 
 export default function Home() {
   // Timer state
@@ -19,39 +17,27 @@ export default function Home() {
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [gifs, setGifs] = useState<GifJson>({ increase: '', decrease: '' });
-  const [headline, setHeadline] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Scoreboard state
-  const [team1Name, setTeam1Name] = useState('Team 1');
-  const [team2Name, setTeam2Name] = useState('Team 2');
-  const [team1Score, setTeam1Score] = useState(0);
-  const [team2Score, setTeam2Score] = useState(0);
-  const [team1Animation, setTeam1Animation] = useState('');
-  const [team2Animation, setTeam2Animation] = useState('');
   const [winningTeam, setWinningTeam] = useState('');
-
-  // Score editing state
-  const [team1ScoreInput, setTeam1ScoreInput] = useState('');
-  const [team2ScoreInput, setTeam2ScoreInput] = useState('');
-  const [isEditingTeam1Score, setIsEditingTeam1Score] = useState(false);
-  const [isEditingTeam2Score, setIsEditingTeam2Score] = useState(false);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const hasSpokenRef = useRef<Set<number>>(new Set());
   const [showMessage, setShowMessage] = useState(false);
-  const [gif, setGif] = useState('');
+
+  // Scoreboard State
+  const {
+    state,
+    updateTeamName,
+    handleScoreFocus,
+    handleScoreInputChange,
+    handleScoreSubmit,
+    handleScoreKeyPress,
+    disableShowMessage
+  } = useScoreboard();
 
   const timeOverAudioRef = useRef<HTMLAudioElement | null>(null);
-
-  const fireConfetti = useCallback(() => {
-    confetti({
-      particleCount: 150,
-      spread: 70,
-      origin: { y: 0.6 },
-    });
-  }, []);
 
   // Voice countdown function
   const speakNumber = (number: number) => {
@@ -75,11 +61,7 @@ export default function Home() {
     timeOverAudioRef.current?.play();
   };
 
-  const getGif = (teamToScore: string, score: number, change: string) => {
-    console.log(change, winningTeam, teamToScore);
-    const gif = change === 'increase' ? gifs.increase : gifs.decrease;
-    return gif;
-  };
+
 
   // Timer logic
   useEffect(() => {
@@ -131,21 +113,7 @@ export default function Home() {
     };
   }, [isRunning, minutes, seconds]);
 
-  useEffect(() => {
-    const loadMessages = async () => {
-      try {
-        const response = await fetch('/data/gifs.json');
-        const data = await response.json();
-        setGifs(data);
-      } catch (error) {
-        console.error('Failed to load messages:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    loadMessages();
-  }, []);
 
   useEffect(() => {
     const timeOverAudio = new Audio('/sounds/timer-over.wav');
@@ -179,109 +147,6 @@ export default function Home() {
     setIsEditing(false);
   };
 
-
-  const animateScore = (
-    team: 'team1' | 'team2',
-    type: 'increase' | 'decrease'
-  ) => {
-    const animation = type === 'increase' ? 'score-increase' : 'score-decrease';
-    if (team === 'team1') {
-      setTeam1Animation(animation);
-      setTimeout(() => setTeam1Animation(''), 600);
-    } else {
-      setTeam2Animation(animation);
-      setTimeout(() => setTeam2Animation(''), 600);
-    }
-  };
-
-  const handleScoreFocus = (team: 'team1' | 'team2') => {
-    if (team === 'team1') {
-      setIsEditingTeam1Score(true);
-      setTeam1ScoreInput('');
-    } else {
-      setIsEditingTeam2Score(true);
-      setTeam2ScoreInput('');
-    }
-  };
-
-
-  const handleScoreInputChange = (team: 'team1' | 'team2', value: string) => {
-
-    const numericValue = value.replace(/[^0-9]/g, '');
-
-    if (team === 'team1') {
-      setTeam1ScoreInput(numericValue);
-    } else {
-      setTeam2ScoreInput(numericValue);
-    }
-  };
-
-
-  const handleScoreSubmit = (team: 'team1' | 'team2') => {
-    const inputValue = team === 'team1' ? team1ScoreInput : team2ScoreInput;
-    const parsedScore = parseInt(inputValue) || 0;
-    const validScore = Math.max(0, parsedScore);
-    const oldScore = team === 'team1' ? team1Score : team2Score;
-    const change = validScore - oldScore;
-
-    if (team === 'team1') {
-      setTeam1Score(validScore);
-      setIsEditingTeam1Score(false);
-      setTeam1ScoreInput('');
-      if (change !== 0) {
-        animateScore('team1', change > 0 ? 'increase' : 'decrease');
-      }
-    } else {
-      setTeam2Score(validScore);
-      setIsEditingTeam2Score(false);
-      setTeam2ScoreInput('');
-      if (change !== 0) {
-        animateScore('team2', change > 0 ? 'increase' : 'decrease');
-      }
-    }
-
-    const newTeam1Score = team === 'team1' ? validScore : team1Score;
-    const newTeam2Score = team === 'team2' ? validScore : team2Score;
-
-    if (newTeam1Score > newTeam2Score) {
-      setWinningTeam(team1Name);
-    } else if (newTeam2Score > newTeam1Score) {
-      setWinningTeam(team2Name);
-    } else {
-      setWinningTeam('Tie');
-    }
-
-
-    if (change !== 0 && gifs) {
-      const teamToScore = team === 'team1' ? team1Name : team2Name;
-      const scoreChange = change > 0 ? 'increase' : 'decrease';
-      const gif = getGif(teamToScore, validScore, scoreChange);
-      const headline = change > 0
-        ? `Way To Go ${teamToScore}!`
-        : `Try Harder ${teamToScore}!`;
-      if(change > 0) {
-        fireConfetti();
-      }
-      setGif(gif);
-      setHeadline(headline);
-      setShowMessage(true);
-    }
-  };
-
-  const handleScoreKeyPress = (team: 'team1' | 'team2', e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleScoreSubmit(team);
-    } else if (e.key === 'Escape') {
-      // Cancel editing
-      if (team === 'team1') {
-        setIsEditingTeam1Score(false);
-        setTeam1ScoreInput('');
-      } else {
-        setIsEditingTeam2Score(false);
-        setTeam2ScoreInput('');
-      }
-    }
-  };
 
   return (
     <div
@@ -321,19 +186,19 @@ export default function Home() {
             <div className="text-center">
               <input
                 type="text"
-                value={team1Name}
-                onChange={(e) => setTeam1Name(e.target.value)}
+                value={state.team1.name}
+                onChange={(e) => updateTeamName('team1', e.target.value)}
                 className="text-3xl font-bold text-[#01519A] bg-transparent border-b-2 border-blue-200 focus:border-[#01519A] focus:outline-none text-center w-full mb-4 pb-2"
                 maxLength={20}
               />
               <input
                 type="text"
-                value={isEditingTeam1Score ? team1ScoreInput : team1Score.toString()}
+                value={state.isEditingTeam1Score ? state.team1ScoreInput : state.team1.score.toString()}
                 onChange={(e) => handleScoreInputChange('team1', e.target.value)}
                 onFocus={() => handleScoreFocus('team1')}
-                onBlur={() => isEditingTeam1Score && handleScoreSubmit('team1')}
+                onBlur={() => state.isEditingTeam1Score && handleScoreSubmit('team1')}
                 onKeyDown={(e) => handleScoreKeyPress('team1', e)}
-                className={`text-[10vh] font-bold text-[#01519A] mb-6 bg-transparent text-center w-full focus:outline-none focus:bg-blue-50 rounded-lg transition-all duration-300 ${team1Animation} ${isEditingTeam1Score ? 'ring-2 ring-blue-300' : ''}`}
+                className={`text-[10vh] font-bold text-[#01519A] mb-6 bg-transparent text-center w-full focus:outline-none focus:bg-blue-50 rounded-lg transition-all duration-300 ${state.team1.animation} ${state.isEditingTeam1Score ? 'ring-2 ring-blue-300' : ''}`}
                 inputMode="numeric"
                 pattern="[0-9]*"
               />
@@ -343,19 +208,19 @@ export default function Home() {
             <div className="text-center">
               <input
                 type="text"
-                value={team2Name}
-                onChange={(e) => setTeam2Name(e.target.value)}
+                value={state.team2.name}
+                onChange={(e) => updateTeamName('team2', e.target.value)}
                 className="text-3xl font-bold text-[#01519A] bg-transparent border-b-2 border-blue-200 focus:border-[#01519A] focus:outline-none text-center w-full mb-4 pb-2"
                 maxLength={20}
               />
               <input
                 type="text"
-                value={isEditingTeam2Score ? team2ScoreInput : team2Score.toString()}
+                value={state.isEditingTeam2Score ? state.team2ScoreInput : state.team2.score.toString()}
                 onChange={(e) => handleScoreInputChange('team2', e.target.value)}
                 onFocus={() => handleScoreFocus('team2')}
-                onBlur={() => isEditingTeam2Score && handleScoreSubmit('team2')}
+                onBlur={() => state.isEditingTeam2Score && handleScoreSubmit('team2')}
                 onKeyDown={(e) => handleScoreKeyPress('team2', e)}
-                className={`text-[10vh] font-bold text-[#01519A] mb-6 bg-transparent text-center w-full focus:outline-none focus:bg-blue-50 rounded-lg transition-all duration-300 ${team2Animation} ${isEditingTeam2Score ? 'ring-2 ring-blue-300' : ''}`}
+                className={`text-[10vh] font-bold text-[#01519A] mb-6 bg-transparent text-center w-full focus:outline-none focus:bg-blue-50 rounded-lg transition-all duration-300 ${state.team2.animation} ${state.isEditingTeam2Score ? 'ring-2 ring-blue-300' : ''}`}
                 inputMode="numeric"
                 pattern="[0-9]*"
               />
@@ -391,8 +256,8 @@ export default function Home() {
               ) : (
                 <div
                   className={`text-6xl font-mono cursor-pointer transition-colors duration-300 ${minutes === 0 && seconds <= 10
-                      ? 'text-red-500 animate-pulse'
-                      : 'text-[#01519A]'
+                    ? 'text-red-500 animate-pulse'
+                    : 'text-[#01519A]'
                     }`}
                   onClick={() => !isRunning && setIsEditing(true)}
                 >
@@ -431,12 +296,11 @@ export default function Home() {
         </div>
 
         {/* Message Popup */}
-        {showMessage && (
+        {state.showMessage && (
           <CenterMessage
-            gif={gif}
-            headline={headline}
+            headline={state.headline}
             duration={3000}
-            onClose={() => setShowMessage(false)}
+            onClose={() => disableShowMessage()}
           />
         )}
 
