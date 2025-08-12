@@ -192,7 +192,6 @@ export const ScoreboardProvider: React.FC<ScoreboardProviderProps> = ({ children
         const change = validScore - oldScore;
 
         dispatch({ type: 'SET_TEAM_SCORE', payload: { team, score: validScore } });
-        dispatch({ type: 'SET_EDITING_SCORE', payload: { team, editing: false } });
         dispatch({ type: 'SET_SCORE_INPUT', payload: { team, input: '' } });
 
         if (change !== 0) {
@@ -220,11 +219,12 @@ export const ScoreboardProvider: React.FC<ScoreboardProviderProps> = ({ children
                 ? `Way To Go ${teamName}!`
                 : `Try Harder ${teamName}!`;
             dispatch({ type: 'SET_HEADER', payload: { input: headline } });
-            dispatch({ type: 'SET_SHOW_MESSAGE', payload: {input: true }});
             if (onScoreChange) {
                 onScoreChange(teamName, validScore, change > 0 ? 'increase' : 'decrease');
             }
         }
+
+        dispatch({ type: 'SET_EDITING_SCORE', payload: { team, editing: false } });
     };
 
     const handleScoreKeyPress = (team: 'team1' | 'team2', e: React.KeyboardEvent) => {

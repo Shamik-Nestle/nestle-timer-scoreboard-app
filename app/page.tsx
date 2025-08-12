@@ -17,14 +17,9 @@ export default function Home() {
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  // Scoreboard state
-  const [winningTeam, setWinningTeam] = useState('');
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const hasSpokenRef = useRef<Set<number>>(new Set());
-  const [showMessage, setShowMessage] = useState(false);
 
   // Scoreboard State
   const {
@@ -154,7 +149,7 @@ export default function Home() {
       style={{
         backgroundImage: `url('/data/back.png')`,
         backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundPosition: 'bottom 10%',
         backgroundBlendMode: 'overlay',
       }}
     >
@@ -179,10 +174,10 @@ export default function Home() {
           </h1>
         </div>
 
-        {/* Scoreboard */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 w-full max-w-2xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Team 1 */}
+        {/* Row: Team1 - Timer - Team2 */}
+        <div className="flex flex-col md:flex-row items-center justify-between w-full px-4">
+          {/* Team 1 */}
+          <div className="bg-white rounded-3xl shadow-xl p-4 w-full md:w-1/4 max-w-sm mb-6 md:mb-0">
             <div className="text-center">
               <input
                 type="text"
@@ -193,44 +188,27 @@ export default function Home() {
               />
               <input
                 type="text"
-                value={state.isEditingTeam1Score ? state.team1ScoreInput : state.team1.score.toString()}
+                value={
+                  state.isEditingTeam1Score
+                    ? state.team1ScoreInput
+                    : state.team1.score.toString()
+                }
                 onChange={(e) => handleScoreInputChange('team1', e.target.value)}
                 onFocus={() => handleScoreFocus('team1')}
-                onBlur={() => state.isEditingTeam1Score && handleScoreSubmit('team1')}
+                onBlur={() =>
+                  state.isEditingTeam1Score && handleScoreSubmit('team1')
+                }
                 onKeyDown={(e) => handleScoreKeyPress('team1', e)}
-                className={`text-[10vh] font-bold text-[#01519A] mb-6 bg-transparent text-center w-full focus:outline-none focus:bg-blue-50 rounded-lg transition-all duration-300 ${state.team1.animation} ${state.isEditingTeam1Score ? 'ring-2 ring-blue-300' : ''}`}
-                inputMode="numeric"
-                pattern="[0-9]*"
-              />
-            </div>
-
-            {/* Team 2 */}
-            <div className="text-center">
-              <input
-                type="text"
-                value={state.team2.name}
-                onChange={(e) => updateTeamName('team2', e.target.value)}
-                className="text-3xl font-bold text-[#01519A] bg-transparent border-b-2 border-blue-200 focus:border-[#01519A] focus:outline-none text-center w-full mb-4 pb-2"
-                maxLength={20}
-              />
-              <input
-                type="text"
-                value={state.isEditingTeam2Score ? state.team2ScoreInput : state.team2.score.toString()}
-                onChange={(e) => handleScoreInputChange('team2', e.target.value)}
-                onFocus={() => handleScoreFocus('team2')}
-                onBlur={() => state.isEditingTeam2Score && handleScoreSubmit('team2')}
-                onKeyDown={(e) => handleScoreKeyPress('team2', e)}
-                className={`text-[10vh] font-bold text-[#01519A] mb-6 bg-transparent text-center w-full focus:outline-none focus:bg-blue-50 rounded-lg transition-all duration-300 ${state.team2.animation} ${state.isEditingTeam2Score ? 'ring-2 ring-blue-300' : ''}`}
+                className={`text-[10vh] font-bold text-[#01519A] mb-6 bg-transparent text-center w-full focus:outline-none focus:bg-blue-50 rounded-lg transition-all duration-300 ${state.team1.animation} ${state.isEditingTeam1Score ? 'ring-2 ring-blue-300' : ''
+                  }`}
                 inputMode="numeric"
                 pattern="[0-9]*"
               />
             </div>
           </div>
-        </div>
 
-        {/* Countdown Timer */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md">
-          <div className="text-center">
+          {/* Timer */}
+          <div className="bg-white/25 rounded-3xl shadow-xl p-4 w-full md:w-1/4 max-w-md text-center">
             {/* Timer Display */}
             <div className="mb-6">
               {isEditing ? (
@@ -240,7 +218,9 @@ export default function Home() {
                     min="0"
                     max="59"
                     value={minutes}
-                    onChange={(e) => setMinutes(parseInt(e.target.value) || 0)}
+                    onChange={(e) =>
+                      setMinutes(parseInt(e.target.value) || 0)
+                    }
                     className="w-[5vl] text-4xl font-mono text-center border-2 border-[#01519A] rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-300"
                   />
                   <span className="text-4xl font-mono text-[#01519A]">:</span>
@@ -249,15 +229,17 @@ export default function Home() {
                     min="0"
                     max="59"
                     value={seconds.toString().padStart(2, '0')}
-                    onChange={(e) => setSeconds(parseInt(e.target.value) || 0)}
+                    onChange={(e) =>
+                      setSeconds(parseInt(e.target.value) || 0)
+                    }
                     className="w-[5vl] text-4xl font-mono text-center border-2 border-[#01519A] rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-300"
                   />
                 </div>
               ) : (
                 <div
                   className={`text-6xl font-mono cursor-pointer transition-colors duration-300 ${minutes === 0 && seconds <= 10
-                    ? 'text-red-500 animate-pulse'
-                    : 'text-[#01519A]'
+                      ? 'text-red-500 animate-pulse'
+                      : 'text-[#01519A]'
                     }`}
                   onClick={() => !isRunning && setIsEditing(true)}
                 >
@@ -267,7 +249,7 @@ export default function Home() {
             </div>
 
             {/* Timer Controls */}
-            <div className="flex justify-center space-x-4">
+            <div className="flex justify-center space-x-4 mb-4">
               {isEditing ? (
                 <button
                   onClick={updateInitialTime}
@@ -292,6 +274,45 @@ export default function Home() {
                 </>
               )}
             </div>
+
+            {/* Finish Button */}
+            <button
+              onClick={() => console.log('Finish pressed')}
+              className="bg-red-500 text-white px-6 py-3 rounded-full hover:bg-red-600 transition-colors duration-300 font-semibold"
+            >
+              Finish
+            </button>
+          </div>
+
+          {/* Team 2 */}
+          <div className="bg-white rounded-3xl shadow-xl p-8 w-full md:w-1/4 max-w-sm mb-6 md:mb-0">
+            <div className="text-center">
+              <input
+                type="text"
+                value={state.team2.name}
+                onChange={(e) => updateTeamName('team2', e.target.value)}
+                className="text-3xl font-bold text-[#01519A] bg-transparent border-b-2 border-blue-200 focus:border-[#01519A] focus:outline-none text-center w-full mb-4 pb-2"
+                maxLength={20}
+              />
+              <input
+                type="text"
+                value={
+                  state.isEditingTeam2Score
+                    ? state.team2ScoreInput
+                    : state.team2.score.toString()
+                }
+                onChange={(e) => handleScoreInputChange('team2', e.target.value)}
+                onFocus={() => handleScoreFocus('team2')}
+                onBlur={() =>
+                  state.isEditingTeam2Score && handleScoreSubmit('team2')
+                }
+                onKeyDown={(e) => handleScoreKeyPress('team2', e)}
+                className={`text-[10vh] font-bold text-[#01519A] mb-6 bg-transparent text-center w-full focus:outline-none focus:bg-blue-50 rounded-lg transition-all duration-300 ${state.team2.animation} ${state.isEditingTeam2Score ? 'ring-2 ring-blue-300' : ''
+                  }`}
+                inputMode="numeric"
+                pattern="[0-9]*"
+              />
+            </div>
           </div>
         </div>
 
@@ -306,25 +327,45 @@ export default function Home() {
 
         {/* Animations */}
         <style jsx>{`
-          @keyframes score-increase {
-            0% { transform: scale(1); color: #01519A; }
-            50% { transform: scale(1.2); color: #22c55e; }
-            100% { transform: scale(1); color: #01519A; }
-          }
-          @keyframes score-decrease {
-            0% { transform: scale(1); color: #01519A; }
-            50% { transform: scale(1.2); color: #ef4444; }
-            100% { transform: scale(1); color: #01519A; }
-          }
-          .score-increase {
-            animation: score-increase 0.6s ease-in-out;
-          }
-          .score-decrease {
-            animation: score-decrease 0.6s ease-in-out;
-          }
-        `}</style>
+      @keyframes score-increase {
+        0% {
+          transform: scale(1);
+          color: #01519a;
+        }
+        50% {
+          transform: scale(1.2);
+          color: #22c55e;
+        }
+        100% {
+          transform: scale(1);
+          color: #01519a;
+        }
+      }
+      @keyframes score-decrease {
+        0% {
+          transform: scale(1);
+          color: #01519a;
+        }
+        50% {
+          transform: scale(1.2);
+          color: #ef4444;
+        }
+        100% {
+          transform: scale(1);
+          color: #01519a;
+        }
+      }
+      .score-increase {
+        animation: score-increase 0.6s ease-in-out;
+      }
+      .score-decrease {
+        animation: score-decrease 0.6s ease-in-out;
+      }
+    `}</style>
       </div>
     </div>
+
+
 
   );
 }
