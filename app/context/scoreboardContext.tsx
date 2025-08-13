@@ -42,8 +42,8 @@ type ScoreboardAction =
 
 
 const initialScoreboardState: ScoreboardState = {
-    team1: { name: 'Team 1', score: 0, animation: '' },
-    team2: { name: 'Team 2', score: 0, animation: '' },
+    team1: { name: 'Team Saffron', score: 0, animation: '' },
+    team2: { name: 'Team Green', score: 0, animation: '' },
     winningTeam: '',
     isEditingTeam1Score: false,
     isEditingTeam2Score: false,

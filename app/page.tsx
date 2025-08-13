@@ -13,7 +13,7 @@ export default function Home() {
   // Timer state
   const [initialMinutes, setInitialMinutes] = useState(5);
   const [initialSeconds, setInitialSeconds] = useState(0);
-  const [minutes, setMinutes] = useState(5);
+  const [minutes, setMinutes] = useState(2);
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
